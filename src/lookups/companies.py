@@ -22,6 +22,7 @@ def fetch_company_map(client: BitrixClient) -> Dict[int, str]:
         }
     """
 
+    # This endpoint is paginated according to Bitrix API docs, which is handled by call_all
     companies = client.call_all(
         "crm.company.list",
         payload={

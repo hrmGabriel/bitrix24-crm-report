@@ -22,6 +22,7 @@ def fetch_user_map(client: BitrixClient) -> Dict[int, str]:
         }
     """
 
+    # This endpoint is paginated according to Bitrix API docs, which is handled by call_all
     users = client.call_all("user.get")
 
     if not users:

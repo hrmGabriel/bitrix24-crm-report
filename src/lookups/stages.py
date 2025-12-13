@@ -30,6 +30,7 @@ def fetch_stage_map(
     stage_map: Dict[int, Dict[str, str]] = {}
 
     for category_id in pipeline_map.keys():
+        # This endpoint is NOT paginated according to Bitrix API docs
         response = client.call(
             "crm.dealcategory.stage.list",
             {"id": category_id},

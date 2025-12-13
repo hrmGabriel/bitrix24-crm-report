@@ -29,6 +29,7 @@ def fetch_userfield_enum_map(
         }
     """
 
+    # This endpoint returns only 1 entity, so no pagination is needed
     response = client.call(
         "crm.deal.userfield.get",
         payload={"id": userfield_id}

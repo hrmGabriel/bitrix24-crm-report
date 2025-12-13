@@ -28,6 +28,7 @@ def fetch_status_map(
         }
     """
 
+    # This endpoint returns a closed list, so no pagination is needed
     statuses = client.call(
         "crm.status.list",
         payload={

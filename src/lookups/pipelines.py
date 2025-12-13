@@ -21,7 +21,8 @@ def fetch_pipeline_map(client: BitrixClient) -> Dict[int, str]:
         15: "Inside Sales"
     }
     """
-
+    
+    # This endpoint is paginated according to Bitrix API docs, which is handled by call_all
     categories = client.call_all("crm.dealcategory.list")
 
     pipeline_map: Dict[int, str] = {}
