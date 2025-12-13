@@ -27,7 +27,7 @@ def run() -> None:
         webhook=BITRIX_WEBHOOK,
     )
 
-    deals = fetch_deals(client)
+    deals = fetch_deals(client=client, start_date="2025-12-12")
 
     print(f"Total deals fetched: {len(deals)}\n")
 

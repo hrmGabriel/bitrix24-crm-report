@@ -7,7 +7,7 @@ Responsible for:
 - Returning raw deal data for further enrichment
 """
 
-from typing import List, Dict
+from typing import List, Dict, Any
 from src.bitrix_client import BitrixClient
 
 
@@ -33,20 +33,25 @@ DEAL_SELECT_FIELDS = [
 ]
 
 
-def fetch_deals(client: BitrixClient) -> List[Dict]:
+def fetch_deals(
+    client: BitrixClient,
+    start_date: str | None = None
+) -> List[Dict[str, Any]]:
     """
-    Fetches all deals from Bitrix24 CRM.
+    Fetches CRM deals with optional date filtering.
 
-    Returns:
-        List of raw deal dictionaries exactly as returned by the API.
-        No transformations or enrichments are applied at this stage.
+    Args:
+        start_date: ISO date string (YYYY-MM-DD).
+                    If provided, only deals created on or after this date are fetched.
     """
 
-    deals = client.call_all(
-        "crm.deal.list",
-        payload={
-            "select": DEAL_SELECT_FIELDS
+    payload: Dict[str, Any] = {
+        "select": ["*"]
+    }
+
+    if start_date:
+        payload["filter"] = {
+            ">=DATE_CREATE": start_date
         }
-    )
 
-    return deals
+    return client.call_all("crm.deal.list", payload)
