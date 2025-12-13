@@ -22,8 +22,7 @@ def fetch_user_map(client: BitrixClient) -> Dict[int, str]:
         }
     """
 
-    response = client.call("user.get")
-    users = response.get("result", [])
+    users = client.call_all("user.get")
 
     if not users:
         return {}
