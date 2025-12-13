@@ -2,18 +2,31 @@
 Company lookup utilities.
 
 Responsible for:
-- Fetching CRM companies
+- Fetching CRM companies by ID
 - Building a lookup:
   { company_id: company_title }
+
+This implementation avoids crm.company.list due to scalability and
+pagination issues on large datasets.
 """
 
-from typing import Dict
+from typing import Dict, Iterable
 from src.bitrix_client import BitrixClient
 
 
-def fetch_company_map(client: BitrixClient) -> Dict[int, str]:
+def fetch_company_map(
+        client: BitrixClient,
+        company_ids: Iterable[int],
+    ) -> Dict[int, str]:
     """
-    Fetches all CRM companies and builds a lookup map.
+    Fetches CRM companies by ID and builds a lookup map.
+
+    This function uses crm.company.get to avoid loading the entire
+    company database, which may contain tens of thousands of records.
+
+    Args:
+        client: Initialized BitrixClient
+        company_ids: Iterable of company IDs referenced by deals
 
     Returns:
         {
@@ -22,28 +35,27 @@ def fetch_company_map(client: BitrixClient) -> Dict[int, str]:
         }
     """
 
-    # This endpoint is paginated according to Bitrix API docs, which is handled by call_all
-    companies = client.call_all(
-        "crm.company.list",
-        payload={
-            "select": ["ID", "TITLE"]
-        }
-    )
-
-    if not companies:
-        # Not fatal: some CRMs legitimately have no companies
-        return {}
-
     company_map: Dict[int, str] = {}
 
-    for company in companies:
+    for company_id in set(company_ids):
+        # Skip invalid or empty IDs
+        if not company_id:
+            continue
+
         try:
-            company_id = int(company["ID"])
-        except (KeyError, ValueError):
+            response = client.call(
+                "crm.company.get",
+                payload={"id": company_id},
+            )
+        except Exception:
+            # Non-fatal: deals may reference deleted companies
+            continue
+
+        company = response.get("result")
+        if not company:
             continue
 
         title = company.get("TITLE", "").strip()
-
         if not title:
             title = "Unnamed Company"
 
