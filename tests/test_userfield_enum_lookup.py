@@ -8,6 +8,9 @@ This test validates:
 - Dynamic mapping of enum ID -> label
 
 This test uses real API calls.
+
+Run this test with:
+    $ python -m tests.test_userfield_enum_lookup
 """
 
 from src.bitrix_client import BitrixClient

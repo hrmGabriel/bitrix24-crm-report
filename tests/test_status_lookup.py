@@ -7,6 +7,9 @@ Validates:
 
 Common use case:
 - Resolving SOURCE_ID values in crm.deal.list
+
+Run this test with:
+    $ python -m tests.test_status_lookup
 """
 
 from src.bitrix_client import BitrixClient

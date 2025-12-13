@@ -4,6 +4,9 @@ Integration test for Bitrix users lookup.
 This test validates:
 - Access to user.get
 - Correct mapping of user ID to full name
+
+Run this test with:
+    $ python -m tests.test_users_lookup
 """
 
 from src.bitrix_client import BitrixClient

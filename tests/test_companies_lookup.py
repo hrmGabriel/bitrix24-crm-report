@@ -6,6 +6,9 @@ Validates:
 - crm.company.get behavior
 - Proper mapping of COMPANY_ID -> COMPANY_TITLE
 - Resilience to invalid or missing company IDs
+
+Run this test with:
+    $ python -m tests.test_companies_lookup
 """
 
 from src.bitrix_client import BitrixClient

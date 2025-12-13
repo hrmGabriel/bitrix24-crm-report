@@ -9,7 +9,7 @@ This test validates:
 It does NOT validate business data.
 
 Run this test with:
-    $ python -m tests.env_test
+    $ python -m tests.test_connection
 """
 
 from src.bitrix_client import BitrixClient
