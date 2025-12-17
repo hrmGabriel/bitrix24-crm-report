@@ -6,6 +6,9 @@ Validates:
 - Enrichment
 - Normalization
 - XLSX generation
+
+Run this test with:
+    $ python -m tests.test_full_export_pipeline
 """
 
 from src.pipelines.deal_export_pipeline import run_export
