@@ -13,13 +13,14 @@ from typing import List
 
 from src.loaders import deals
 from src.bitrix_client import BitrixClient
-from src.config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK
+from src.config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK, GOOGLE_SHEET_ID
 
 from src.loaders.deals import fetch_deals
 from src.enrichers.deals import enrich_deals
 
 from src.normalizers.deal_export_normalizer import normalize_deal_for_export
 from src.exporters.xlsx_exporter import export_deals_to_xlsx
+from src.exporters.google_sheets_exporter import export_to_google_sheets
 
 from src.lookups.pipelines import fetch_pipeline_map
 from src.lookups.stages import fetch_stage_map
@@ -107,12 +108,22 @@ def run_export(days_back: int = 1) -> None:
     ]
 
     # 5. Export to XLSX
+    """
     output_file = "bitrix_deals_export.xlsx"
     print(f"Exporting to XLSX: {output_file}")
 
     export_deals_to_xlsx(
         deals=normalized_deals,
         output_path=output_file,
+    )
+    """
+
+    # 6. Export to Google Sheets
+    export_to_google_sheets(
+        spreadsheet_id=GOOGLE_SHEET_ID,
+        sheet_name="Folha1",
+        rows=normalized_deals,
+        credentials_path="credentials.json",
     )
 
     print("\nDeal export pipeline completed successfully.")
