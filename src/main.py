@@ -1,10 +1,7 @@
 """
 Application entrypoint.
 
-Allows running the full Bitrix deal export pipeline
-as a standalone script.
-
-Future-friendly for packaging (PyInstaller / Nuitka).
+Allows running the full Bitrix24 deal export pipeline as a standalone script.
 
 To properly run this application, use the command below:
     $ python -m src.main
@@ -20,7 +17,7 @@ def main() -> None:
 
     print("=== Bitrix Deal Export ===\n")
 
-    # Fetch deals starting from the specified date (yyyy-mm-dd format).
+    # Date from which the deals will be fetched (yyyy-mm-dd format).
     start_date = "2025-01-01"
 
     # Complete pipeline execution, from Bitrix24 API requests to export to Google Sheets.
