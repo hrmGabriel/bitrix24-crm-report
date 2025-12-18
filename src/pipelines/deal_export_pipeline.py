@@ -29,6 +29,9 @@ from src.lookups.companies import fetch_company_map
 from src.lookups.statuses import fetch_status_map
 from src.lookups.userfield_enums import fetch_userfield_enum_map
 
+# Progress logger for deal loading
+def deal_progress(count: int) -> None:
+    print(f"\rLoading deals... {count} loaded", end="", flush=True)
 
 def run_export(start_date: str) -> None:
     """
@@ -47,12 +50,12 @@ def run_export(start_date: str) -> None:
     )
 
     # 1. Load deals
-    print("Loading deals...")
     deals = fetch_deals(
         client=client,
         start_date=start_date,
+        progress_callback=deal_progress,
     )
-    print(f"Deals loaded: {len(deals)}\n")
+    print(f"\nDeals loaded: {len(deals)}\n")
 
     if not deals:
         print("No deals found. Aborting export.")

@@ -35,7 +35,8 @@ DEAL_SELECT_FIELDS = [
 
 def fetch_deals(
     client: BitrixClient,
-    start_date: str | None = None
+    start_date: str | None = None,
+    progress_callback=None,
 ) -> List[Dict[str, Any]]:
     """
     Fetches CRM deals with optional date filtering.
@@ -43,6 +44,7 @@ def fetch_deals(
     Args:
         start_date: ISO date string (YYYY-MM-DD).
                     If provided, only deals created on or after this date are fetched.
+        progress_callback: Optional callback to report loading progress.
     """
 
     payload: Dict[str, Any] = {
@@ -54,4 +56,10 @@ def fetch_deals(
             ">=DATE_CREATE": start_date
         }
 
-    return client.call_all("crm.deal.list", payload)
+    # Delegate progress reporting to Bitrix client pagination
+    return client.call_all(
+        "crm.deal.list",
+        payload,
+        progress_callback=progress_callback,
+    )
+

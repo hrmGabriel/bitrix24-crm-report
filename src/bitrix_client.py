@@ -1,4 +1,5 @@
 import requests
+import time
 from typing import Any, Dict
 from .config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK
 
@@ -64,24 +65,57 @@ class BitrixClient:
         
         Raises an error if the response contains an API error.
         """
+
         url = self._get_full_url(method)  # Get the full URL for the method
-        response = requests.post(url, json=payload or {})  # Make the POST request
 
-        # Check if there was an error in the HTTP response (e.g., 4xx or 5xx)
-        response.raise_for_status()
+        max_retries = 5        # Maximum number of retries in case of rate limit
+        base_sleep = 0.4       # Base delay between requests (~2.5 req/s)
 
-        # Convert the response to JSON
-        data = response.json()
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Make the POST request
+                response = requests.post(url, json=payload or {}, timeout=60)
 
-        # Check if the API returned an error
-        if "error" in data:
-            raise RuntimeError(
-                f"Bitrix API error: {data['error']} - {data.get('error_description')}"
-            )
+                # Check if there was an error in the HTTP response (e.g., 4xx or 5xx)
+                response.raise_for_status()
 
-        return data
+                # Convert the response to JSON
+                data = response.json()
 
-    def call_all(self, method: str, payload: Dict[str, Any] | None = None) -> list:
+                # Check if the API returned an error
+                if "error" in data:
+                    raise RuntimeError(
+                        f"Bitrix API error: {data['error']} - {data.get('error_description')}"
+                    )
+
+                # Small delay to respect Bitrix API rate limits
+                time.sleep(base_sleep)
+
+                return data
+
+            except requests.HTTPError:
+                # Handle Bitrix rate limit (HTTP 429)
+                if response.status_code == 429:
+                    wait_time = base_sleep * attempt * 2  # Exponential backoff
+                    print(
+                        f"\nRate limit reached (429). "
+                        f"Retry {attempt}/{max_retries} in {wait_time:.1f}s..."
+                    )
+                    time.sleep(wait_time)
+                    continue
+
+                # Re-raise any other HTTP error
+                raise
+
+        # If all retries fail, raise a fatal error
+        raise RuntimeError("Maximum retries exceeded when calling Bitrix API")
+
+    def call_all(
+        self,
+        method: str,
+        payload: Dict[str, Any] | None = None,
+        progress_callback=None,
+    ) -> list:
         """
         Makes paginated requests to the Bitrix API.
 
@@ -91,12 +125,14 @@ class BitrixClient:
         Arguments:
         - method: The API method to be called (e.g., "list").
         - payload: Additional data to be sent (optional).
-        
+        - progress_callback: Optional function called with the total number
+                            of items loaded so far (for logging purposes).
+
         Returns:
         - A list containing all the results from all pages.
         """
         results = []  # List to store all results
-        start = 0  # Pagination control
+        start = 0     # Pagination control
 
         while True:
             # Prepare the request body with the "start" parameter for pagination
@@ -112,6 +148,10 @@ class BitrixClient:
 
             # Add the results to the list
             results.extend(data["result"])
+
+            # Notify progress after each page
+            if progress_callback:
+                progress_callback(len(results))
 
             # If there is no "next" in the response, stop the loop
             if "next" not in data:
