@@ -63,8 +63,11 @@ def export_to_google_sheets(
 
     sheets_api = service.spreadsheets()
 
-    # Prepare data
-    values = [headers] + rows
+    # Convert list of dicts into list of lists
+    values = [headers]
+
+    for row in rows:
+        values.append([row.get(header, "") for header in headers])
 
     # Clear existing content
     clear_range = f"{sheet_name}!A:Z"
