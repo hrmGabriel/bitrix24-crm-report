@@ -2,10 +2,16 @@
 Google Sheets exporter.
 
 Responsibilities:
-- Authenticate using a Google Service Account
-- Export tabular data to a Google Spreadsheet
-- Clear existing content before writing
-- Auto-resize columns for better readability
+- Authenticate using a Google Service Account.
+- Export tabular data to a Google Spreadsheet.
+- Clear existing content before writing.
+- Auto-resize columns for better readability.
+
+This exporter always performs a full refresh:
+- Clears the entire sheet.
+- Rewrites headers and all rows.
+
+This behavior is intentional to keep dashboards consistent.
 """
 
 from typing import List
@@ -19,9 +25,9 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 def export_to_google_sheets(
     spreadsheet_id: str,
     sheet_name: str,
-    headers: List[str],
     rows: List[List],
     credentials_path: str,
+    headers: List[str] | None = None, # Optional
 ) -> None:
     """
     Exports data to a Google Sheet.
@@ -33,6 +39,14 @@ def export_to_google_sheets(
         rows: Table rows
         credentials_path: Path to service account credentials JSON
     """
+
+    # Auto-generate headers from the first row if not provided
+    if not headers:
+        if not rows:
+            raise ValueError("Cannot export empty dataset to Google Sheets")
+
+        headers = list(rows[0].keys())
+
 
     # Authenticate
     credentials = service_account.Credentials.from_service_account_file(

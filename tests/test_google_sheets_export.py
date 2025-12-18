@@ -48,9 +48,9 @@ def run() -> None:
     export_to_google_sheets(
         spreadsheet_id=GOOGLE_SHEET_ID,
         sheet_name="Folha1",
-        headers=headers,
         rows=rows,
         credentials_path="credentials.json",
+        headers=headers,
     )
 
     print("Google Sheets export test completed successfully.")
