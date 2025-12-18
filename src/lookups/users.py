@@ -30,10 +30,14 @@ def fetch_user_map(client: BitrixClient) -> Dict[int, str]:
 
     user_map: Dict[int, str] = {}
 
-    for user in users:
+    total = len(users)
+    print(f"Resolving users... 0/{total}", end="", flush=True)
+
+    for index, user in enumerate(users, start=1):
         try:
             user_id = int(user["ID"])
         except (KeyError, ValueError):
+            print(f"\rResolving users... {index}/{total}", end="", flush=True)
             continue
 
         first_name = user.get("NAME", "").strip()
@@ -45,5 +49,10 @@ def fetch_user_map(client: BitrixClient) -> Dict[int, str]:
             full_name = "Unknown User"
 
         user_map[user_id] = full_name
+
+        # Dynamic progress update
+        print(f"\rResolving users... {index}/{total}", end="", flush=True)
+
+    print()
 
     return user_map

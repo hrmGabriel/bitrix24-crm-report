@@ -29,7 +29,12 @@ def fetch_stage_map(
 
     stage_map: Dict[int, Dict[str, str]] = {}
 
-    for category_id in pipeline_map.keys():
+    pipeline_ids = list(pipeline_map.keys())
+    total = len(pipeline_ids)
+
+    print(f"Resolving stages... 0/{total}", end="", flush=True)
+
+    for index, category_id in enumerate(pipeline_ids, start=1):
         # This endpoint is NOT paginated according to Bitrix API docs
         response = client.call(
             "crm.dealcategory.stage.list",
@@ -39,6 +44,7 @@ def fetch_stage_map(
         stages = response.get("result", [])
 
         if not stages:
+            print(f"\rResolving stages... {index}/{total}", end="", flush=True)
             continue
 
         stage_map[category_id] = {}
@@ -51,6 +57,11 @@ def fetch_stage_map(
                 continue
 
             stage_map[category_id][status_id] = stage_name
+
+        # Dynamic progress update
+        print(f"\rResolving stages... {index}/{total}", end="", flush=True)
+
+    print()
 
     if not stage_map:
         raise RuntimeError(

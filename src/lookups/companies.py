@@ -15,9 +15,9 @@ from src.bitrix_client import BitrixClient
 
 
 def fetch_company_map(
-        client: BitrixClient,
-        company_ids: Iterable[int],
-    ) -> Dict[int, str]:
+    client: BitrixClient,
+    company_ids: Iterable[int],
+) -> Dict[int, str]:
     """
     Fetches CRM companies by ID and builds a lookup map.
 
@@ -37,11 +37,13 @@ def fetch_company_map(
 
     company_map: Dict[int, str] = {}
 
-    for company_id in set(company_ids):
-        # Skip invalid or empty IDs
-        if not company_id:
-            continue
+    # Normalize and deduplicate company IDs
+    unique_company_ids = [cid for cid in set(company_ids) if cid]
+    total = len(unique_company_ids)
 
+    print(f"Resolving companies... 0/{total}", end="", flush=True)
+
+    for index, company_id in enumerate(unique_company_ids, start=1):
         try:
             response = client.call(
                 "crm.company.get",
@@ -49,10 +51,12 @@ def fetch_company_map(
             )
         except Exception:
             # Non-fatal: deals may reference deleted companies
+            print(f"\rResolving companies... {index}/{total}", end="", flush=True)
             continue
 
         company = response.get("result")
         if not company:
+            print(f"\rResolving companies... {index}/{total}", end="", flush=True)
             continue
 
         title = company.get("TITLE", "").strip()
@@ -60,5 +64,10 @@ def fetch_company_map(
             title = "Unnamed Company"
 
         company_map[company_id] = title
+
+        # Dynamic progress update
+        print(f"\rResolving companies... {index}/{total}", end="", flush=True)
+
+    print()  # Final line break after progress completion
 
     return company_map

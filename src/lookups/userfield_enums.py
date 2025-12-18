@@ -51,12 +51,24 @@ def fetch_userfield_enum_map(
 
     enum_map: Dict[str, str] = {}
 
-    for item in enum_list:
+    total = len(enum_list)
+    print(f"Resolving userfield enums ({userfield_id})... 0/{total}", end="", flush=True)
+
+    for index, item in enumerate(enum_list, start=1):
         item_id = item.get("ID")
         value = item.get("VALUE")
 
         if item_id and value:
             enum_map[item_id] = value
+
+        # Dynamic progress update
+        print(
+            f"\rResolving userfield enums ({userfield_id})... {index}/{total}",
+            end="",
+            flush=True,
+        )
+
+    print()
 
     if not enum_map:
         raise RuntimeError(
