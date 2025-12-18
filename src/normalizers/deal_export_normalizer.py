@@ -34,12 +34,24 @@ FIELD_LABEL_MAP: Dict[str, str] = {
 def normalize_deal_for_export(deal: Dict[str, Any]) -> Dict[str, Any]:
     """
     Converts an enriched deal into an export-ready structure.
+    Applies final presentation rules and value translations.
     """
 
     normalized: Dict[str, Any] = {}
 
     for internal_key, value in deal.items():
         label = FIELD_LABEL_MAP.get(internal_key, internal_key)
+
+        # Translate deal type codes to user-friendly labels
+        if internal_key == "type" and value == "SALE":
+            value = "Vendas"
+
+        # Translate document type enum values
+        if internal_key == "document_type":
+            if value == "509":
+                value = "CPF"
+            elif value == "511":
+                value = "CNPJ"
 
         # Final presentation rules
         if value is None:
