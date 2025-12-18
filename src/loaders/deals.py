@@ -13,24 +13,27 @@ from src.bitrix_client import BitrixClient
 
 DEAL_SELECT_FIELDS = [
     "ID",
-    "CATEGORY_ID",
-    "STAGE_ID",
-    "COMPANY_ID",
-    "ASSIGNED_BY_ID",
     "TITLE",
     "TYPE_ID",
+    "STAGE_ID",
+    "CATEGORY_ID",
+    "COMPANY_ID",
+    "ASSIGNED_BY_ID",
     "SOURCE_ID",
     "OPPORTUNITY",
     "DATE_CREATE",
     "BEGINDATE",
     "CLOSEDATE",
-    "UF_CRM_1750948742478",   # Order description
-    "UF_CRM_1750950619818",   # Consultant name
-    "UF_CRM_1750951091402",   # Management
-    "UF_CRM_1751306725382",   # Advanced sale type
-    "UF_CRM_1751332724412",   # Total devices value
-    "UF_CRM_1753968931293",   # Document type
+
+    # Custom fields
+    "UF_CRM_1750948742478",  # Descrição do Pedido
+    "UF_CRM_1750950619818",  # Nome do Consultor
+    "UF_CRM_1750951091402",  # Gerência
+    "UF_CRM_1751306725382",  # Tipo de Venda Avançados
+    "UF_CRM_1751332724412",  # Valor Total de Aparelhos
+    "UF_CRM_1753968931293",  # Tipo de Documento
 ]
+
 
 
 def fetch_deals(
@@ -48,7 +51,7 @@ def fetch_deals(
     """
 
     payload: Dict[str, Any] = {
-        "select": ["*"]
+        "select": DEAL_SELECT_FIELDS
     }
 
     if start_date:
