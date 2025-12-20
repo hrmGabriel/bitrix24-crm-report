@@ -51,10 +51,13 @@ def fetch_stage_map(
 
         for stage in stages:
             try:
-                status_id = stage["STATUS_ID"]
+                raw_status_id = stage["STATUS_ID"]
                 stage_name = stage["NAME"]
             except KeyError:
                 continue
+
+            # Normalize STATUS_ID (e.g. C15:WON -> WON)
+            status_id = raw_status_id.split(":", 1)[-1]
 
             stage_map[category_id][status_id] = stage_name
 
