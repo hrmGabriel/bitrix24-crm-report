@@ -10,6 +10,8 @@ Run this test with:
     $ python -m tests.deal_enrichment
 """
 
+from datetime import date, timedelta
+
 from src.bitrix_client import BitrixClient
 from src.config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK
 
@@ -37,10 +39,13 @@ def run() -> None:
         webhook=BITRIX_WEBHOOK,
     )
 
+    yesterday = date.today() - timedelta(days=1)
+    start_date = yesterday.strftime("%Y-%m-%d")
+
     # Load raw data
     deals = fetch_deals(
         client=client,
-        start_date="2025-12-12"
+        start_date=start_date
     )
     print(f"Deals loaded: {len(deals)}")
 

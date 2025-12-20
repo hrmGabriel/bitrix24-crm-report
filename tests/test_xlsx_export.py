@@ -4,6 +4,9 @@ XLSX export integration test.
 Validates:
 - Deal normalization
 - XLSX file generation
+
+Run this test with:
+    $ python -m tests.test_xlsx_export
 """
 
 from src.normalizers.deal_export_normalizer import normalize_deal_for_export

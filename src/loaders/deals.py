@@ -13,29 +13,33 @@ from src.bitrix_client import BitrixClient
 
 DEAL_SELECT_FIELDS = [
     "ID",
-    "CATEGORY_ID",
-    "STAGE_ID",
-    "COMPANY_ID",
-    "ASSIGNED_BY_ID",
     "TITLE",
     "TYPE_ID",
+    "STAGE_ID",
+    "CATEGORY_ID",
+    "COMPANY_ID",
+    "ASSIGNED_BY_ID",
     "SOURCE_ID",
     "OPPORTUNITY",
     "DATE_CREATE",
     "BEGINDATE",
     "CLOSEDATE",
-    "UF_CRM_1750948742478",   # Order description
-    "UF_CRM_1750950619818",   # Consultant name
-    "UF_CRM_1750951091402",   # Management
-    "UF_CRM_1751306725382",   # Advanced sale type
-    "UF_CRM_1751332724412",   # Total devices value
-    "UF_CRM_1753968931293",   # Document type
+
+    # Custom fields
+    "UF_CRM_1750948742478",  # Descrição do Pedido
+    "UF_CRM_1750950619818",  # Nome do Consultor
+    "UF_CRM_1750951091402",  # Gerência
+    "UF_CRM_1751306725382",  # Tipo de Venda Avançados
+    "UF_CRM_1751332724412",  # Valor Total de Aparelhos
+    "UF_CRM_1753968931293",  # Tipo de Documento
 ]
+
 
 
 def fetch_deals(
     client: BitrixClient,
-    start_date: str | None = None
+    start_date: str | None = None,
+    progress_callback=None,
 ) -> List[Dict[str, Any]]:
     """
     Fetches CRM deals with optional date filtering.
@@ -43,10 +47,11 @@ def fetch_deals(
     Args:
         start_date: ISO date string (YYYY-MM-DD).
                     If provided, only deals created on or after this date are fetched.
+        progress_callback: Optional callback to report loading progress.
     """
 
     payload: Dict[str, Any] = {
-        "select": ["*"]
+        "select": DEAL_SELECT_FIELDS
     }
 
     if start_date:
@@ -54,4 +59,10 @@ def fetch_deals(
             ">=DATE_CREATE": start_date
         }
 
-    return client.call_all("crm.deal.list", payload)
+    # Delegate progress reporting to Bitrix client pagination
+    return client.call_all(
+        "crm.deal.list",
+        payload,
+        progress_callback=progress_callback,
+    )
+

@@ -27,15 +27,23 @@ def fetch_pipeline_map(client: BitrixClient) -> Dict[int, str]:
 
     pipeline_map: Dict[int, str] = {}
 
-    for category in categories:
+    total = len(categories)
+    print(f"Resolving pipelines... 0/{total}", end="", flush=True)
+
+    for index, category in enumerate(categories, start=1):
         try:
             category_id = int(category["ID"])
             category_name = category["NAME"]
         except KeyError:
-            # Ignore malformed entries
+            print(f"\rResolving pipelines... {index}/{total}", end="", flush=True)
             continue
 
         pipeline_map[category_id] = category_name
+
+        # Dynamic progress update
+        print(f"\rResolving pipelines... {index}/{total}", end="", flush=True)
+
+    print()
 
     if not pipeline_map:
         raise RuntimeError(

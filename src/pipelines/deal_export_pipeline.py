@@ -13,13 +13,14 @@ from typing import List
 
 from src.loaders import deals
 from src.bitrix_client import BitrixClient
-from src.config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK
+from src.config import BITRIX_URL, BITRIX_USER_ID, BITRIX_WEBHOOK, GOOGLE_SHEET_ID
 
 from src.loaders.deals import fetch_deals
 from src.enrichers.deals import enrich_deals
 
 from src.normalizers.deal_export_normalizer import normalize_deal_for_export
-from src.exporters.xlsx_exporter import export_deals_to_xlsx
+# from src.exporters.xlsx_exporter import export_deals_to_xlsx
+from src.exporters.google_sheets_exporter import export_to_google_sheets
 
 from src.lookups.pipelines import fetch_pipeline_map
 from src.lookups.stages import fetch_stage_map
@@ -28,13 +29,16 @@ from src.lookups.companies import fetch_company_map
 from src.lookups.statuses import fetch_status_map
 from src.lookups.userfield_enums import fetch_userfield_enum_map
 
+# Progress logger for deal loading
+def deal_progress(count: int) -> None:
+    print(f"\rLoading deals... {count} loaded", end="", flush=True)
 
-def run_export(days_back: int = 1) -> None:
+def run_export(start_date: str) -> None:
     """
     Runs the full deal export pipeline.
 
     Args:
-        days_back: How many days back to fetch deals from
+        start_date: Date from which to fetch all deals.
     """
 
     print("Starting deal export pipeline...\n")
@@ -45,15 +49,13 @@ def run_export(days_back: int = 1) -> None:
         webhook=BITRIX_WEBHOOK,
     )
 
-    start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
-
     # 1. Load deals
-    print("Loading deals...")
     deals = fetch_deals(
         client=client,
         start_date=start_date,
+        progress_callback=deal_progress,
     )
-    print(f"Deals loaded: {len(deals)}\n")
+    print(f"\nDeals loaded: {len(deals)}\n")
 
     if not deals:
         print("No deals found. Aborting export.")
@@ -107,12 +109,22 @@ def run_export(days_back: int = 1) -> None:
     ]
 
     # 5. Export to XLSX
+    """
     output_file = "bitrix_deals_export.xlsx"
     print(f"Exporting to XLSX: {output_file}")
 
     export_deals_to_xlsx(
         deals=normalized_deals,
         output_path=output_file,
+    )
+    """
+
+    # 6. Export to Google Sheets
+    export_to_google_sheets(
+        spreadsheet_id=GOOGLE_SHEET_ID,
+        sheet_name="Folha1",
+        rows=normalized_deals,
+        credentials_path="credentials.json",
     )
 
     print("\nDeal export pipeline completed successfully.")

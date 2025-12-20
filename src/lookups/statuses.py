@@ -45,12 +45,24 @@ def fetch_status_map(
 
     status_map: Dict[str, str] = {}
 
-    for status in statuses:
+    total = len(statuses)
+    print(f"Resolving statuses ({entity_id})... 0/{total}", end="", flush=True)
+
+    for index, status in enumerate(statuses, start=1):
         status_id = status.get("STATUS_ID")
         name = status.get("NAME")
 
         if status_id and name:
             status_map[status_id] = name
+
+        # Dynamic progress update
+        print(
+            f"\rResolving statuses ({entity_id})... {index}/{total}",
+            end="",
+            flush=True,
+        )
+
+    print()
 
     if not status_map:
         raise RuntimeError(
