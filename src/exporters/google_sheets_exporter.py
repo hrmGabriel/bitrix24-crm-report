@@ -133,6 +133,46 @@ def export_to_google_sheets(
     # Small delay to avoid hitting write quota immediately
     time.sleep(WRITE_DELAY_SECONDS)
 
+    # Ensure the sheet has enough rows to receive all data
+    # Google Sheets does NOT auto-expand grid size on values.update
+    required_rows = 1 + len(values)  # 1 header row + data rows
+
+    sheet_metadata = sheets_api.get(
+        spreadsheetId=spreadsheet_id
+    ).execute()
+
+    sheet_id = None
+    current_row_count = 0
+
+    for sheet in sheet_metadata["sheets"]:
+        properties = sheet.get("properties", {})
+        if properties.get("title") == sheet_name:
+            sheet_id = properties.get("sheetId")
+            grid_props = properties.get("gridProperties", {})
+            current_row_count = grid_props.get("rowCount", 0)
+            break
+
+    if sheet_id is not None and required_rows > current_row_count:
+        rows_to_add = required_rows - current_row_count
+
+        # Expand sheet grid to avoid "range exceeds grid limits" errors
+        execute_with_retry(
+            sheets_api.batchUpdate(
+                spreadsheetId=spreadsheet_id,
+                body={
+                    "requests": [
+                        {
+                            "appendDimension": {
+                                "sheetId": sheet_id,
+                                "dimension": "ROWS",
+                                "length": rows_to_add,
+                            }
+                        }
+                    ]
+                },
+            )
+        )
+
     # Write data rows in chunks to avoid request size and timeout issues
     start_row = 2  # Data starts after header row
 
