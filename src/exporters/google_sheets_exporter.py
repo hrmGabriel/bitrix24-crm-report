@@ -206,39 +206,41 @@ def export_to_google_sheets(
             sheet_id = sheet["properties"]["sheetId"]
             break
     
-    # Auto-resize columns for better readability
-    # This step is optional and may timeout on large sheets
-    if sheet_id is not None:
-        requests = [
-            {
-                "autoResizeDimensions": {
-                    "dimensions": {
-                        "sheetId": sheet_id,
-                        "dimension": "COLUMNS",
-                        "startIndex": 0,
-                        "endIndex": len(headers),
-                    }
-                }
-            }
-        ]
-
-        try:
-            execute_with_retry(
-                sheets_api.batchUpdate(
-                    spreadsheetId=spreadsheet_id,
-                    body={"requests": requests},
-                )
-            )
-        except (TimeoutError, socket.timeout):
-            # Non-fatal: data was already written successfully
-            print(
-                "Warning: column auto-resize timed out. "
-                "Data export completed successfully."
-            )
-
-        execute_with_retry(
-            sheets_api.batchUpdate(
-                spreadsheetId=spreadsheet_id,
-                body={"requests": requests},
-            )
-        )
+    """
+    OPTIONAL: Auto-resize columns for better readability
+    
+    WARNING:
+    - This operation is NOT required for the export to work
+    - It may timeout on large sheets (30k+ rows) in GitHub Actions
+    - Recommended to keep disabled in automated pipelines
+    
+    To enable, uncomment the block below.
+    """
+    
+    # if sheet_id is not None:
+    #     requests = [
+    #         {
+    #             "autoResizeDimensions": {
+    #                 "dimensions": {
+    #                     "sheetId": sheet_id,
+    #                     "dimension": "COLUMNS",
+    #                     "startIndex": 0,
+    #                     "endIndex": len(headers),
+    #                 }
+    #             }
+    #         }
+    #     ]
+    #
+    #     try:
+    #         execute_with_retry(
+    #             sheets_api.batchUpdate(
+    #                 spreadsheetId=spreadsheet_id,
+    #                 body={"requests": requests},
+    #             )
+    #         )
+    #     except (TimeoutError, socket.timeout) as e:
+    #         # Non-fatal: data was already written successfully
+    #         print(
+    #             "Warning: column auto-resize skipped due to timeout. "
+    #             "Data export completed successfully."
+    #         )
